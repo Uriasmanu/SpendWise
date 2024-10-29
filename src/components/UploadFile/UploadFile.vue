@@ -41,19 +41,23 @@
             </svg>
         </span>
         <label class="custom-file-upload"> Enviar planilha
-            <input type="file" @change="uploadFile" /> 
+            <input type="file" @change="uploadFile" />
         </label>
     </button>
-
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import Papa from "papaparse";
-import Cookies from "js-cookie";
+
 
 export default defineComponent({
     name: "UploadFile",
+    data() {
+        return {
+            listaRegistro: [] as Array<{ data: string; descricao: string; identificador: string; valor: number }>
+        };
+    },
     methods: {
         uploadFile(event: Event) {
             const target = event.target as HTMLInputElement;
@@ -62,21 +66,39 @@ export default defineComponent({
 
             Papa.parse(file, {
                 header: true,
-                complete: (results) => {
+                complete: async (results) => {
                     const jsonData = results.data;
 
-                    // Armazena o JSON em um cookie
-                    Cookies.set("extratoFinanceiro", JSON.stringify(jsonData), { expires: 7 });
+                    const formattedData = jsonData.map((item: any) => {
+                        if (item.Data && item.Descrição && item.Identificador && item.Valor) {
+                            const [day, month, year] = item.Data.split('/');
+                            const formattedDate = `${year}-${month}-${day}`;
 
-                    // Exibe o JSON no console
-                    console.log("JSON armazenado no cookie:", jsonData);
+                            return {
+                                data: formattedDate,
+                                descricao: item.Descrição,
+                                identificador: item.Identificador,
+                                valor: parseFloat(item.Valor),
+                                categoria: null
+                            };
+                        }
+                        return null;
+                    }).filter(item => item !== null);
+
+                    this.listaRegistro = formattedData;
+
+
+                    // Exibindo cada item da lista
+                    formattedData.forEach((item, index) => {
+                        console.log(`Item ${index + 1}:`, item);
+                    });
                 }
             });
-        }
+        },
     }
 });
 </script>
 
 <style lang="scss" scoped>
-@import './UploadFile'
+@import './UploadFile.scss'
 </style>
