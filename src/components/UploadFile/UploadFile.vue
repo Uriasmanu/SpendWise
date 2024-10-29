@@ -49,17 +49,17 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import Papa from "papaparse";
-
+import axios from "axios"; // Adicione esta linha para importar o Axios
 
 export default defineComponent({
     name: "UploadFile",
     data() {
         return {
-            listaRegistro: [] as Array<{ data: string; descricao: string; identificador: string; valor: number }>
+            listaRegistro: [] as Array<{ data: string; descricao: string; identificador: string; valor: number }>,
         };
     },
     methods: {
-        uploadFile(event: Event) {
+        async uploadFile(event: Event) {
             const target = event.target as HTMLInputElement;
             const file = target.files ? target.files[0] : null;
             if (!file) return;
@@ -79,7 +79,7 @@ export default defineComponent({
                                 descricao: item.Descrição,
                                 identificador: item.Identificador,
                                 valor: parseFloat(item.Valor),
-                                categoria: null
+                                categoria: null,
                             };
                         }
                         return null;
@@ -87,15 +87,19 @@ export default defineComponent({
 
                     this.listaRegistro = formattedData;
 
-
-                    // Exibindo cada item da lista
-                    formattedData.forEach((item, index) => {
-                        console.log(`Item ${index + 1}:`, item);
-                    });
-                }
+                    // Enviar cada registro para o servidor
+                    for (const item of this.listaRegistro) {
+                        try {
+                            await axios.post('http://localhost:3000/api/registros', item); // Ajuste a URL conforme necessário
+                            console.log(`Registro enviado:`, item);
+                        } catch (error) {
+                            console.error(`Erro ao enviar o registro: ${item}`, error);
+                        }
+                    }
+                },
             });
         },
-    }
+    },
 });
 </script>
 
