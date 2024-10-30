@@ -90,7 +90,7 @@ export default defineComponent({
                     // Enviar cada registro para o servidor
                     for (const item of this.listaRegistro) {
                         try {
-                            await axios.post('http://localhost:3000/api/registros', item); // Ajuste a URL conforme necessário
+                            await axios.post('https://localhost:7014/api/Registros', item); 
                             console.log(`Registro enviado:`, item);
                         } catch (error) {
                             console.error(`Erro ao enviar o registro: ${item}`, error);
